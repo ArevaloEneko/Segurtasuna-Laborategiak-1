@@ -60,33 +60,40 @@ def erakutsi_maiztasunak(testua: str) -> None:
     ):
         print(f"{letra.upper()}: {maiztasunak[letra]}")
 
-def zuzendu_ordezkapena(ordezkapena: dict[str, str]) -> None:
-    while True:
-        sarrera = input(
-            "\nAldaketa (adibidez P=A, ENTER amaitzeko): "
-        ).strip().lower()
+def zuzendu_ordezkapena(
+    testua: str,
+    ordezkapena: dict[str, str]
+) -> bool:
+    sarrera = input(
+        "\nAldaketa (adibidez P=A, ENTER amaitzeko): "
+    ).strip().lower()
 
-        if not sarrera:
-            break
+    if not sarrera:
+        return False
 
-        if "=" not in sarrera or sarrera.count("=") != 1:
-            print("Formatua: P=A")
-            continue
+    if "=" not in sarrera or sarrera.count("=") != 1:
+        print("Formatua: P=A")
+        return True
 
-        zifratua, garbia = sarrera.split("=")
+    zifratua, garbia = sarrera.split("=")
 
-        if (
-            len(zifratua) != 1
-            or len(garbia) != 1
-            or not zifratua.isalpha()
-            or not garbia.isalpha()
-        ):
-            print("Letra bana idatzi behar dituzu.")
-            continue
+    if (
+        len(zifratua) != 1
+        or len(garbia) != 1
+        or not zifratua.isalpha()
+        or not garbia.isalpha()
+    ):
+        print("Letra bana idatzi behar dituzu.")
+        return True
 
-        ordezkapena[zifratua] = garbia
+    ordezkapena[zifratua] = garbia
 
-        print(f"{zifratua.upper()} → {garbia.upper()} aldatu da.")
+    print(f"\n{zifratua.upper()} → {garbia.upper()} aldatu da.")
+    print("\nMezua eguneratuta:")
+    print("-" * 60)
+    print(deszifratu(testua, ordezkapena))
+
+    return True
 
 def main() -> None:
     print("=" * 60)
@@ -109,19 +116,8 @@ def main() -> None:
     print("Aldatu zifratutako letra bat letra garbi batekin.")
     print("Adibidez: P=A")
 
-    while True:
-        zuzendu_ordezkapena(ordezkapena)
-
-        print("\nDeszifratutako mezua:")
-        print("-" * 60)
-        print(deszifratu(testua, ordezkapena))
-
-        berriro = input(
-            "\nBeste hizkiren bat aldatu nahi duzu? [b/e]: "
-        ).strip().lower()
-
-        if berriro != "b":
-            break
+    while zuzendu_ordezkapena(testua, ordezkapena):
+        pass
 
     print("\nAzken mezua:")
     print("-" * 60)
