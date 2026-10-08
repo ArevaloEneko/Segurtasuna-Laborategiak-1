@@ -1,91 +1,78 @@
-def xor_bytes(a: bytes, b: bytes) -> bytes:
-    """Aplica XOR byte a byte entre dos secuencias de la misma longitud.
+#!/usr/bin/env python3
 
-    Al ser XOR una operación simétrica, esta misma función sirve tanto
-    para cifrar como para descifrar: cifrar(m, k) = c, cifrar(c, k) = m.
-    """
+def xor_bytes(a: bytes, b: bytes) -> bytes:
     return bytes(x ^ y for x, y in zip(a, b))
 
+def hex_irakurgarria(datuak: bytes) -> str:
+    return " ".join(f"{byte:02X}" for byte in datuak)
 
-def hex_legible(datos: bytes) -> str:
-    """Devuelve el hexadecimal separado por espacios cada byte, para
-    que sea más fácil de leer que un bloque continuo de caracteres."""
-    return " ".join(f"{byte:02x}" for byte in datos)
+def ascii_irakurgarria(datuak: bytes) -> str:
+    emaitza = ""
+    for byte in datuak:
+        if 32 <= byte <= 126:
+            emaitza += chr(byte)
+        else:
+            emaitza += f"\\x{byte:02X}"
+    return emaitza
 
-
-def cifrar_flujo(mensaje_texto: str, gakoa_texto: str) -> tuple[bytes, bytes, bytes, bytes]:
-    """Cifra y descifra un mensaje mediante XOR con una clave de la misma longitud.
-
-    Devuelve (mensaje_bytes, gakoa_bytes, kriptograma, deszifratua).
-    """
-    mensaje_bytes = mensaje_texto.encode("utf-8")
-    gakoa_bytes = gakoa_texto.encode("utf-8")
-
-    # Importante: la longitud se comprueba sobre los BYTES ya codificados,
-    # no sobre el número de caracteres. Con letras como ñ, ü o acentos,
-    # un carácter puede ocupar más de un byte en UTF-8, así que comparar
-    # len(mensaje_texto) con len(gakoa_texto) podría dar un resultado
-    # engañoso.
-    if len(mensaje_bytes) != len(gakoa_bytes):
+def egiaztatu_sarrerak(mezu_bytes: bytes, gakoa_bytes: bytes) -> None:
+    if not mezu_bytes:
+        raise ValueError("Mezua ezin da hutsik egon.")
+    if not gakoa_bytes:
+        raise ValueError("Gakoa ezin da hutsik egon.")
+    if len(mezu_bytes) != len(gakoa_bytes):
         raise ValueError(
-            f"Mezuak eta gakoak luzera bera izan behar dute "
-            f"(mezua: {len(mensaje_bytes)} byte, gakoa: {len(gakoa_bytes)} byte)"
+            f"Mezuak eta gakoak byte kopuru bera izan behar dute "
+            f"(mezua: {len(mezu_bytes)}, gakoa: {len(gakoa_bytes)})."
         )
 
-    kriptograma = xor_bytes(mensaje_bytes, gakoa_bytes)
+def erakutsi_emaitza(mezu_bytes: bytes, gakoa_bytes: bytes, kriptograma: bytes, deszifratua: bytes) -> None:
+    print("\n" + "=" * 72)
+    print("XOR ZIFRATZEA")
+    print("=" * 72)
+
+    print("\nJatorrizko mezua:")
+    print(mezu_bytes.decode("utf-8"))
+
+    print("\nGakoa:")
+    print(gakoa_bytes.decode("utf-8"))
+
+    print("\nKRIPTOGRAMA - ASCII:")
+    print(ascii_irakurgarria(kriptograma))
+
+    print("\nKRIPTOGRAMA - HEX:")
+    print(hex_irakurgarria(kriptograma))
+
+    print("\nDESZIFRATUTAKO MEZUA - ASCII:")
+    print(deszifratua.decode("utf-8"))
+
+    print("\nDESZIFRATUTAKO MEZUA - HEX:")
+    print(hex_irakurgarria(deszifratua))
+
+    print("\nEgiaztapena:")
+    print("Bai" if deszifratua == mezu_bytes else "Ez")
+
+def zifratu_eta_deszifratu(testua: str, gakoa: str) -> tuple[bytes, bytes, bytes, bytes]:
+    mezu_bytes = testua.encode("utf-8")
+    gakoa_bytes = gakoa.encode("utf-8")
+    egiaztatu_sarrerak(mezu_bytes, gakoa_bytes)
+    kriptograma = xor_bytes(mezu_bytes, gakoa_bytes)
     deszifratua = xor_bytes(kriptograma, gakoa_bytes)
-
-    return mensaje_bytes, gakoa_bytes, kriptograma, deszifratua
-
-
-def mostrar_resultado(mensaje_texto: str, mensaje_bytes: bytes, gakoa_bytes: bytes,
-                       kriptograma: bytes, deszifratua: bytes) -> None:
-    print("Jatorrizko mezua (testua):")
-    print(f"  {mensaje_texto}")
-    print("Jatorrizko mezua (hex):")
-    print(f"  {hex_legible(mensaje_bytes)}")
-
-    print("\nGakoa (hex):")
-    print(f"  {hex_legible(gakoa_bytes)}")
-
-    print("\nKriptograma (hex):")
-    print(f"  {hex_legible(kriptograma)}")
-
-    print("\nDeszifratutako mezua (hex):")
-    print(f"  {hex_legible(deszifratua)}")
-    print("Deszifratutako mezua (testua):")
-    print(f"  {deszifratua.decode('utf-8')}")
-
-    print("\nEgiaztapena (deszifratua == jatorrizko mezua):")
-    print(f"  {deszifratua == mensaje_bytes}")
-
+    return mezu_bytes, gakoa_bytes, kriptograma, deszifratua
 
 def main() -> None:
-    # Datos de prueba del enunciado
-    mensaje_texto = "GURE MEZUA HAU DA"
-    gakoa_texto = "GAKO1234567890"
+    print("=" * 72)
+    print("XOR ZIFRATZAILEA")
+    print("=" * 72)
 
-    opcion = input(
-        "Pulsa ENTER para usar el mensaje/clave de prueba, "
-        "o escribe 's' para introducir los tuyos: "
-    ).strip().lower()
-
-    if opcion == "s":
-        mensaje_texto = input("Mezua: ")
-        gakoa_texto = input(
-            f"Gakoa ({len(mensaje_texto.encode('utf-8'))} byte behar ditu): "
-        )
+    testua = input("Sartu zifratu nahi duzun testua: ")
+    gakoa = input("Sartu gakoa, testuaren byte luzera bera izan behar duena: ")
 
     try:
-        mensaje_bytes, gakoa_bytes, kriptograma, deszifratua = cifrar_flujo(
-            mensaje_texto, gakoa_texto
-        )
-    except ValueError as error:
-        print(f"\nErrorea: {error}")
-        return
-
-    mostrar_resultado(mensaje_texto, mensaje_bytes, gakoa_bytes, kriptograma, deszifratua)
-
+        mezu_bytes, gakoa_bytes, kriptograma, deszifratua = zifratu_eta_deszifratu(testua, gakoa)
+        erakutsi_emaitza(mezu_bytes, gakoa_bytes, kriptograma, deszifratua)
+    except ValueError as errorea:
+        print(f"\nErrorea: {errorea}")
 
 if __name__ == "__main__":
     main()

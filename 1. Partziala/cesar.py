@@ -1,19 +1,42 @@
-mensaje = "Uunejvxb dw vdwmx wdnex jzdr, nw wdnbcaxb lxajixwnb"
+#!/usr/bin/env python3
 
-def descifrar_cesar(texto, clave):
-    resultado = ""
+def garbitu_zenbakia(mezua: str) -> int:
+    while True:
+        try:
+            return int(input(mezua).strip())
+        except ValueError:
+            print("Sartu baliozko zenbaki bat.")
 
-    for caracter in texto:
-        if caracter.isalpha():
-            base = ord('a') if caracter.islower() else ord('A')
-            resultado += chr((ord(caracter) - base - clave) % 26 + base)
+def deszifratu_zesar(testua: str, gakoa: int) -> str:
+    emaitza = ""
+    for karakterea in testua:
+        if karakterea.isalpha() and karakterea.isascii():
+            oinarria = ord("a") if karakterea.islower() else ord("A")
+            emaitza += chr((ord(karakterea) - oinarria - gakoa) % 26 + oinarria)
         else:
-            resultado += caracter
+            emaitza += karakterea
+    return emaitza
 
-    return resultado
+def erakutsi_konbinazioak(testua: str) -> None:
+    print("\n" + "=" * 72)
+    print("ZESARREN INDAR BRUTUKO DESZIFRATZEA")
+    print("=" * 72)
+    for gakoa in range(26):
+        emaitza = deszifratu_zesar(testua, gakoa)
+        print(f"{gakoa:2d} → {emaitza}")
+    print("=" * 72)
 
-print("Ataque por fuerza bruta contra César\n")
+def main() -> None:
+    print("=" * 72)
+    print("ZESARREN ZIFRATUA")
+    print("=" * 72)
+    testua = input("Sartu deszifratu nahi duzun testua: ").strip()
 
-for clave in range(26):
-    resultado = descifrar_cesar(mensaje, clave)
-    print(f"Clave {clave:2}: {resultado}")
+    if not testua:
+        print("Testua ezin da hutsik egon.")
+        return
+
+    erakutsi_konbinazioak(testua)
+
+if __name__ == "__main__":
+    main()
